@@ -51,9 +51,9 @@ function love.update(dt)
   if (gamestate == 'serve') then
     ball.dy = math.random(-50, 50)
     if(servingPlayer == 1) then
-      ball.dx = math.random(140, 200)
+      ball.dx = math.random(1400, 2000)
     elseif (servingPlayer == 2) then
-      ball.dx = -math.random(140, 200)
+      ball.dx = -math.random(1400, 2000)
     end
   elseif(gamestate == 'play') then
     ball:update(dt)
@@ -70,60 +70,60 @@ function love.update(dt)
 
       sounds['paddle_hit']:play()
     end
-  end
-  if ball:collides(player2) then
-    ball.dx = -ball.dx * 1.03
-    ball.x = player2.x - 4
+    if ball:collides(player2) then
+      ball.dx = -ball.dx * 1.03
+      ball.x = player2.x - 4
 
-    -- keep velocity going in the same direction, but randomize it
-    if ball.dy < 0 then
-      ball.dy = -math.random(10, 150)
-    else
-      ball.dy = math.random(10, 150)
+      -- keep velocity going in the same direction, but randomize it
+      if ball.dy < 0 then
+        ball.dy = -math.random(10, 150)
+      else
+        ball.dy = math.random(10, 150)
+      end
+
+      sounds['paddle_hit']:play()
+    end
+    if ball.y <= 0 then
+      ball.y = 0
+      ball.dy = -ball.dy
+      sounds['hit_wall']:play()
     end
 
-    sounds['paddle_hit']:play()
-  end
-  if ball.y <= 0 then
-    ball.y = 0
-    ball.dy = -ball.dy
-    sounds['hit_wall']:play()
-  end
-
-  -- -4 to account for the ball's size
-  if ball.y >= VIRTUAL_HEIGHT - 4 then
-    ball.y = VIRTUAL_HEIGHT - 4
-    ball.dy = -ball.dy
-    sounds['hit_wall']:play()
-  end
-  if ball.x < 0 then
-    servingPlayer = 1
-    player2Score = player2Score + 1
-    sounds['score']:play()
-
-    -- if we've reached a score of 10, the game is over; set the
-    -- state to done so we can show the victory message
-    if player2Score == 10 then
-      winningPlayer = 2
-      gamestate = 'done'
-    else
-      gamestate = 'serve'
-      -- places the ball in the middle of the screen, no velocity
-      ball:reset()
+    -- -4 to account for the ball's size
+    if ball.y >= VIRTUAL_HEIGHT - 4 then
+      ball.y = VIRTUAL_HEIGHT - 4
+      ball.dy = -ball.dy
+      sounds['hit_wall']:play()
     end
-  end
+    if ball.x < 0 then
+      servingPlayer = 1
+      player2Score = player2Score + 1
+      sounds['score']:play()
 
-  if ball.x > VIRTUAL_WIDTH then
-    servingPlayer = 2
-    player1Score = player1Score + 1
-    sounds['score']:play()
+      -- if we've reached a score of 10, the game is over; set the
+      -- state to done so we can show the victory message
+      if player2Score == 10 then
+        winningPlayer = 2
+        gamestate = 'done'
+      else
+        gamestate = 'serve'
+        -- places the ball in the middle of the screen, no velocity
+        ball:reset()
+      end
+    end
 
-    if player1Score == 10 then
-      winningPlayer = 1
-      gamestate = 'done'
-    else
-      gamestate = 'serve'
-      ball:reset()
+    if ball.x > VIRTUAL_WIDTH then
+      servingPlayer = 2
+      player1Score = player1Score + 1
+      sounds['score']:play()
+
+      if player1Score == 10 then
+        winningPlayer = 1
+        gamestate = 'done'
+      else
+        gamestate = 'serve'
+        ball:reset()
+      end
     end
   end
   if love.keyboard.isDown('w') then
