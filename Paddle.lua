@@ -16,6 +16,7 @@ end
 function Paddle:render()
   love.graphics.rectangle('fill', self.x, self.y, self.width, self.height)
 end
-function Paddle:getx()
-  return self.x
+function Paddle:reset()
+  self.y = (VIRTUAL_HEIGHT / 2 - self.height / 2)
+  self.dy = 0
 end

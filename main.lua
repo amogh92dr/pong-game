@@ -37,7 +37,7 @@ function love.load()
   player1Score = 0
   player2Score = 0
   player1 = Paddle(10, 30, 5, 20)
-  player2 = Paddle(VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT - 30, 5, 20)
+  player2 = Paddle(VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT / 2 - 10, 5, 20)
   ball = Ball(4)
   --[[
   gamestates: Start, Serve,Play, Done
@@ -47,25 +47,31 @@ end
 
 function love.update(dt)
   player1:update(dt)
-  player2:update(dt)
   if (gamestate == 'serve') then
-    ball.dy = math.random(-50, 50)
+    yballspeed = math.random(-50, 50)
+    ball.dy = yballspeed
+    player2.dy = yballspeed
     if(servingPlayer == 1) then
-      ball.dx = math.random(1400, 2000)
+      ball.dx = math.random(140, 200)
     elseif (servingPlayer == 2) then
-      ball.dx = -math.random(1400, 2000)
+      ball.dx = -math.random(140, 200)
     end
   elseif(gamestate == 'play') then
     ball:update(dt)
+    player2:update(dt)
     if ball:collides(player1) then
       ball.dx = -ball.dx * 1.03
       ball.x = player1.x + 5
 
       -- keep velocity going in the same direction, but randomize it
       if ball.dy < 0 then
-        ball.dy = -math.random(10, 150)
+        yballspeed = math.random(10, 150)
+        ball.dy = -yballspeed
+        player2.dy = -yballspeed
       else
-        ball.dy = math.random(10, 150)
+        yballspeed = math.random(10, 150)
+        ball.dy = yballspeed
+        player2.dy = yballspeed
       end
 
       sounds['paddle_hit']:play()
@@ -76,9 +82,14 @@ function love.update(dt)
 
       -- keep velocity going in the same direction, but randomize it
       if ball.dy < 0 then
-        ball.dy = -math.random(10, 150)
+        yballspeed = math.random(10, 150)
+        ball.dy = -yballspeed
+        player2.dy = -yballspeed
       else
-        ball.dy = math.random(10, 150)
+        yballspeed = math.random(10, 150)
+        ball.dy = yballspeed
+        -- AI will not track ball if it hit player 2 and moving in y positive direction
+        --player2.dy = yballspeed
       end
 
       sounds['paddle_hit']:play()
@@ -86,6 +97,7 @@ function love.update(dt)
     if ball.y <= 0 then
       ball.y = 0
       ball.dy = -ball.dy
+      player2.dy = -player2.dy
       sounds['hit_wall']:play()
     end
 
@@ -93,6 +105,7 @@ function love.update(dt)
     if ball.y >= VIRTUAL_HEIGHT - 4 then
       ball.y = VIRTUAL_HEIGHT - 4
       ball.dy = -ball.dy
+      player2.dy = -player2.dy
       sounds['hit_wall']:play()
     end
     if ball.x < 0 then
@@ -109,6 +122,7 @@ function love.update(dt)
         gamestate = 'serve'
         -- places the ball in the middle of the screen, no velocity
         ball:reset()
+        player2:reset()
       end
     end
 
@@ -123,6 +137,7 @@ function love.update(dt)
       else
         gamestate = 'serve'
         ball:reset()
+        player2:reset()
       end
     end
   end
@@ -135,13 +150,13 @@ function love.update(dt)
   end
 
   -- player 2
-  if love.keyboard.isDown('up') then
-    player2.dy = -PADDLE_SPEED
-  elseif love.keyboard.isDown('down') then
-    player2.dy = PADDLE_SPEED
-  else
-    player2.dy = 0
-  end
+  -- if love.keyboard.isDown('up') then
+  --   player2.dy = -PADDLE_SPEED
+  -- elseif love.keyboard.isDown('down') then
+  --   player2.dy = PADDLE_SPEED
+  -- else
+  --   player2.dy = 0
+  -- end
 
   -- update our ball based on its DX and DY only if we're in play state;
   -- scale the velocity by dt so movement is framerate-independent
@@ -159,6 +174,7 @@ function love.keypressed(key)
         else if (gamestate == 'done') then
           gamestate = 'serve'
           ball:reset()
+          player2:reset()
           -- reset scores to 0
           player1Score = 0
           player2Score = 0
@@ -190,7 +206,7 @@ function love.draw()
         -- no static Render
         else if (gamestate == 'done') then
           love.graphics.setFont(largefont)
-          love.graphics.printf('The Winner is'.. tostring(winningPlayer) .. "!!", 0, 10, VIRTUAL_WIDTH, 'center')
+          love.graphics.printf('The Winner is '.. tostring(winningPlayer) .. "!!", 0, 10, VIRTUAL_WIDTH, 'center')
           love.graphics.setFont(smallfont)
           love.graphics.printf('Press Escape key to Quit', 0, 40, VIRTUAL_WIDTH, 'center')
           love.graphics.printf('Press Enter to Restart Game', 0, 50, VIRTUAL_WIDTH, 'center')
